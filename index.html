@@ -1,0 +1,1593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Recipe Finder — What are you craving tonight?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,500;1,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#171717;
+    --card:#232323;
+    --card-2:#2a2a2a;
+    --gold:#F4C95D;
+    --orange:#F29A38;
+    --cream:#F7F4EF;
+    --white:#FFFFFF;
+    --grey:#B8B8B8;
+    --sage:#88C57F;
+    --border-glass: rgba(247,244,239,0.08);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--white);
+    font-family:'Poppins', sans-serif;
+    overflow-x:hidden;
+  }
+  .serif{font-family:'Cormorant Garamond', serif;}
+  a{color:inherit; text-decoration:none;}
+  img{display:block; width:100%; height:100%; object-fit:cover;}
+
+  ::-webkit-scrollbar{width:10px;}
+  ::-webkit-scrollbar-track{background:var(--bg);}
+  ::-webkit-scrollbar-thumb{background:var(--card-2); border-radius:10px;}
+
+  .wrap{max-width:1240px; margin:0 auto; padding:0 40px;}
+
+  /* ---------- NAV ---------- */
+  nav{
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    padding:22px 0;
+    transition:.4s ease;
+  }
+  nav.scrolled{
+    background:rgba(23,23,23,0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom:1px solid var(--border-glass);
+    padding:14px 0;
+  }
+  .nav-inner{display:flex; align-items:center; justify-content:space-between;}
+  .logo{display:flex; align-items:center; gap:10px; font-weight:700; font-size:20px; letter-spacing:.3px;}
+  .logo-mark{
+    width:34px; height:34px; border-radius:10px;
+    background:linear-gradient(135deg, var(--gold), var(--orange));
+    display:flex; align-items:center; justify-content:center;
+    font-size:17px;
+  }
+  .nav-links{display:flex; gap:36px; font-size:14.5px; color:var(--grey); font-weight:500;}
+  .nav-links a{transition:.25s;}
+  .nav-links a:hover{color:var(--gold);}
+  .nav-cta{
+    padding:11px 24px; border-radius:100px;
+    background:linear-gradient(135deg, var(--gold), var(--orange));
+    color:#1c1200; font-weight:600; font-size:14px;
+    box-shadow:0 6px 20px rgba(242,154,56,0.28);
+    transition:.25s;
+  }
+  .nav-cta:hover{transform:translateY(-2px); box-shadow:0 10px 26px rgba(242,154,56,0.4);}
+  .nav-burger{
+    display:none; flex-direction:column; gap:5px;
+    width:38px; height:38px; border-radius:10px;
+    background:rgba(247,244,239,0.06); border:1px solid var(--border-glass);
+    align-items:center; justify-content:center; cursor:pointer;
+  }
+  .nav-burger span{width:18px; height:2px; background:var(--cream); transition:.3s;}
+  .nav-burger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
+  .nav-burger.open span:nth-child(2){opacity:0;}
+  .nav-burger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+  .nav-mobile-panel{
+    display:none; flex-direction:column; gap:2px;
+    background:rgba(23,23,23,0.97); backdrop-filter:blur(16px);
+    border:1px solid var(--border-glass); border-top:none;
+    border-radius:0 0 18px 18px; padding:10px 22px 18px; margin-top:14px;
+    max-height:0; overflow:hidden; transition:max-height .35s ease;
+  }
+  .nav-mobile-panel.open{max-height:400px; padding:10px 22px 18px;}
+  .nav-mobile-panel a{
+    padding:13px 4px; font-size:15px; color:var(--grey); font-weight:500;
+    border-bottom:1px solid var(--border-glass);
+  }
+  .nav-mobile-panel a:last-of-type{border-bottom:none;}
+  .nav-mobile-panel .nav-cta{display:inline-flex !important; margin-top:14px; justify-content:center; border-bottom:none;}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative; min-height:100vh;
+    display:flex; align-items:center;
+    padding-top:120px; padding-bottom:80px;
+  }
+  .hero-bg{
+    position:absolute; inset:0; z-index:0;
+  }
+  .hero-bg img{filter:saturate(1.08) brightness(0.62);}
+  .hero-bg::after{
+    content:"";
+    position:absolute; inset:0;
+    background:
+      radial-gradient(ellipse at 30% 20%, rgba(244,201,93,0.16), transparent 55%),
+      linear-gradient(180deg, rgba(23,23,23,0.55) 0%, rgba(23,23,23,0.55) 30%, rgba(23,23,23,0.94) 92%, var(--bg) 100%),
+      linear-gradient(90deg, rgba(23,23,23,0.92) 0%, rgba(23,23,23,0.35) 55%, rgba(23,23,23,0.75) 100%);
+  }
+  .hero-content{position:relative; z-index:2; max-width:640px;}
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font-size:13px; letter-spacing:1.6px; text-transform:uppercase;
+    color:var(--gold); font-weight:600;
+    background:rgba(244,201,93,0.1); border:1px solid rgba(244,201,93,0.25);
+    padding:8px 16px; border-radius:100px; margin-bottom:26px;
+  }
+  .hero h1{
+    font-size:clamp(40px, 5.2vw, 68px);
+    font-weight:700; line-height:1.08; letter-spacing:-1px;
+    margin-bottom:22px;
+  }
+  .hero h1 em{
+    font-style:normal;
+    background:linear-gradient(120deg, var(--gold), var(--orange));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .hero p.sub{
+    font-size:18px; color:var(--grey); line-height:1.7; max-width:520px; margin-bottom:38px; font-weight:300;
+  }
+  .hero-actions{display:flex; gap:16px; flex-wrap:wrap; margin-bottom:56px;}
+  .btn-primary{
+    padding:16px 30px; border-radius:100px;
+    background:linear-gradient(135deg, var(--gold), var(--orange));
+    color:#1c1200; font-weight:600; font-size:15.5px;
+    display:inline-flex; align-items:center; gap:10px;
+    box-shadow:0 10px 30px rgba(242,154,56,0.32);
+    transition:.3s;
+  }
+  .btn-primary:hover{transform:translateY(-3px); box-shadow:0 16px 36px rgba(242,154,56,0.45);}
+  .btn-secondary{
+    padding:16px 30px; border-radius:100px;
+    background:rgba(247,244,239,0.06);
+    border:1px solid rgba(247,244,239,0.18);
+    backdrop-filter:blur(10px);
+    color:var(--cream); font-weight:500; font-size:15.5px;
+    display:inline-flex; align-items:center; gap:10px;
+    transition:.3s;
+  }
+  .btn-secondary:hover{background:rgba(247,244,239,0.12); transform:translateY(-3px);}
+
+  .hero-stats{display:flex; gap:44px;}
+  .hero-stats .stat b{display:block; font-size:26px; font-weight:700; color:var(--cream);}
+  .hero-stats .stat span{font-size:13px; color:var(--grey);}
+
+  /* floating ingredient chips */
+  .floaters{position:absolute; inset:0; z-index:1; pointer-events:none;}
+  .chip{
+    position:absolute;
+    background:rgba(35,35,35,0.55);
+    border:1px solid var(--border-glass);
+    backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+    padding:10px 16px; border-radius:100px;
+    font-size:13.5px; font-weight:500; color:var(--cream);
+    display:flex; align-items:center; gap:8px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.25);
+    animation: float 6s ease-in-out infinite;
+  }
+  .chip .dot{width:6px; height:6px; border-radius:50%; background:var(--gold);}
+  @keyframes float{
+    0%,100%{transform:translateY(0);}
+    50%{transform:translateY(-14px);}
+  }
+
+  /* ---------- SECTION SHARED ---------- */
+  section{padding:110px 0;}
+  .section-head{max-width:680px; margin:0 auto 64px; text-align:center;}
+  .section-eyebrow{
+    font-size:13px; letter-spacing:2px; text-transform:uppercase; color:var(--orange); font-weight:600; margin-bottom:16px;
+  }
+  .section-head h2{font-size:clamp(30px,3.6vw,44px); font-weight:700; letter-spacing:-.5px; line-height:1.2;}
+  .section-head p{color:var(--grey); font-size:16.5px; margin-top:16px; line-height:1.7; font-weight:300;}
+
+  /* ---------- HOW IT WORKS ---------- */
+  .steps{display:grid; grid-template-columns:repeat(3,1fr); gap:28px;}
+  .step-card{
+    background:var(--card);
+    border:1px solid var(--border-glass);
+    border-radius:22px; padding:38px 30px;
+    position:relative; transition:.35s;
+  }
+  .step-card:hover{transform:translateY(-6px); border-color:rgba(244,201,93,0.35); box-shadow:0 20px 44px rgba(0,0,0,0.35);}
+  .step-num{
+    font-family:'Cormorant Garamond', serif; font-style:italic;
+    font-size:52px; color:var(--gold); opacity:.55; line-height:1; margin-bottom:18px;
+  }
+  .step-icon{
+    width:52px; height:52px; border-radius:14px;
+    background:rgba(244,201,93,0.12); border:1px solid rgba(244,201,93,0.25);
+    display:flex; align-items:center; justify-content:center; font-size:22px; margin-bottom:20px;
+  }
+  .step-card h3{font-size:19px; font-weight:600; margin-bottom:10px;}
+  .step-card p{color:var(--grey); font-size:14.5px; line-height:1.7; font-weight:300;}
+
+  /* ---------- AI FEATURES ---------- */
+  .features-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:20px;}
+  .feature-card{
+    background:var(--card);
+    border:1px solid var(--border-glass);
+    border-radius:18px; padding:26px 22px;
+    transition:.3s;
+  }
+  .feature-card:hover{background:var(--card-2); transform:translateY(-4px);}
+  .feature-card .f-icon{
+    width:42px; height:42px; border-radius:12px; margin-bottom:16px;
+    display:flex; align-items:center; justify-content:center; font-size:19px;
+    background:linear-gradient(135deg, rgba(244,201,93,0.18), rgba(242,154,56,0.1));
+  }
+  .feature-card h4{font-size:15.5px; font-weight:600; margin-bottom:6px;}
+  .feature-card p{font-size:13px; color:var(--grey); line-height:1.6; font-weight:300;}
+
+  /* ---------- RECIPES ---------- */
+  .recipes-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:28px;}
+  .recipe-card{
+    background:var(--card);
+    border-radius:22px; overflow:hidden;
+    border:1px solid var(--border-glass);
+    transition:.4s;
+    position:relative;
+  }
+  .recipe-card:hover{transform:translateY(-8px); box-shadow:0 26px 50px rgba(0,0,0,0.4); border-color:rgba(244,201,93,0.3);}
+  .recipe-img{height:220px; position:relative; overflow:hidden;}
+  .recipe-img img{transition:.6s ease;}
+  .recipe-card:hover .recipe-img img{transform:scale(1.08);}
+  .match-badge{
+    position:absolute; top:16px; left:16px; z-index:2;
+    background:rgba(23,23,23,0.7); backdrop-filter:blur(8px);
+    border:1px solid rgba(136,197,127,0.4);
+    color:var(--sage); font-size:12px; font-weight:600;
+    padding:6px 12px; border-radius:100px;
+    display:flex; align-items:center; gap:6px;
+  }
+  .fav-badge{
+    position:absolute; top:16px; right:16px; z-index:2;
+    width:34px; height:34px; border-radius:50%;
+    background:rgba(23,23,23,0.6); backdrop-filter:blur(8px);
+    border:1px solid var(--border-glass);
+    display:flex; align-items:center; justify-content:center;
+    font-size:15px; color:var(--cream);
+  }
+  .recipe-body{padding:22px 22px 26px;}
+  .recipe-body h3{font-size:18px; font-weight:600; margin-bottom:12px;}
+  .recipe-meta{display:flex; gap:16px; margin-bottom:16px;}
+  .recipe-meta span{font-size:12.5px; color:var(--grey); display:flex; align-items:center; gap:5px;}
+  .recipe-foot{display:flex; align-items:center; justify-content:space-between; padding-top:16px; border-top:1px solid var(--border-glass);}
+  .recipe-foot .cals{font-size:13px; color:var(--gold); font-weight:600;}
+  .recipe-foot .actions{display:flex; gap:10px; color:var(--grey); font-size:15px;}
+  .recipe-actions{display:flex; justify-content:flex-end; margin-top:14px;}
+  .shopping-add-btn{border:1px solid rgba(244,201,93,0.24); background:rgba(244,201,93,0.1); color:var(--gold); padding:8px 12px; border-radius:999px; font-size:12px; font-weight:600; cursor:pointer; transition:.25s;}
+  .shopping-add-btn:hover{background:rgba(244,201,93,0.2); transform:translateY(-1px);}
+  .shopping-list-panel{margin-top:20px; background:var(--card); border:1px solid var(--border-glass); border-radius:22px; padding:22px; box-shadow:0 20px 48px rgba(0,0,0,0.28);}
+  .shopping-list-top{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px;}
+  .shopping-list-top h3{font-size:18px; font-weight:600;}
+  .shopping-list-top p{font-size:13px; color:var(--grey); margin-top:4px;}
+  .shopping-list-clear{border:1px solid rgba(247,244,239,0.14); border-radius:999px; background:rgba(247,244,239,0.06); color:var(--cream); padding:8px 12px; font-size:12px; font-weight:600; cursor:pointer;}
+  .shopping-list-empty{padding:20px; border:1px dashed var(--border-glass); border-radius:16px; color:var(--grey); text-align:center; font-size:14px;}
+  .shopping-list-items{display:grid; gap:10px;}
+  .shopping-item{display:grid; grid-template-columns:auto 1fr auto; gap:12px; align-items:center; background:var(--card-2); border:1px solid var(--border-glass); border-radius:14px; padding:12px 14px;}
+  .shopping-item input[type="checkbox"]{accent-color:var(--gold); width:16px; height:16px; cursor:pointer;}
+  .shopping-item-main{display:flex; flex-direction:column; gap:4px;}
+  .shopping-item-name{font-size:14px; font-weight:500;}
+  .shopping-item-name.purchased{color:var(--grey); text-decoration:line-through;}
+  .shopping-item-meta{display:flex; flex-wrap:wrap; gap:8px; font-size:11px; color:var(--grey);}
+  .shopping-item-meta span{background:rgba(247,244,239,0.06); padding:3px 8px; border-radius:999px;}
+  .shopping-remove{width:30px; height:30px; border:none; border-radius:50%; background:rgba(247,244,239,0.08); color:var(--cream); cursor:pointer; font-size:15px;}
+
+  /* ---------- DASHBOARD PREVIEW ---------- */
+  .dash-wrap{
+    background:var(--card);
+    border:1px solid var(--border-glass);
+    border-radius:28px; padding:34px;
+    box-shadow:0 30px 70px rgba(0,0,0,0.4);
+  }
+  .dash-top{display:flex; align-items:center; justify-content:space-between; margin-bottom:30px;}
+  .greeting h3{font-size:24px; font-weight:600;}
+  .greeting p{color:var(--grey); font-size:13.5px; margin-top:4px; font-weight:300;}
+  .dash-icons{display:flex; gap:12px;}
+  .dash-icons div{
+    width:42px; height:42px; border-radius:12px; background:var(--card-2);
+    display:flex; align-items:center; justify-content:center; font-size:17px;
+    border:1px solid var(--border-glass);
+  }
+  .ai-search{
+    background:linear-gradient(135deg, rgba(244,201,93,0.1), rgba(242,154,56,0.05));
+    border:1px solid rgba(244,201,93,0.22);
+    border-radius:20px; padding:26px; margin-bottom:26px;
+  }
+  .ai-search-input{
+    display:flex; align-items:center; gap:12px;
+    background:var(--bg); border-radius:14px; padding:16px 18px;
+    border:1px solid var(--border-glass); margin-top:16px;
+  }
+  .ai-search-input span{color:var(--grey); font-size:14.5px; font-weight:300;}
+  .ai-search-actions{display:flex; gap:10px; margin-top:16px;}
+  .ai-search-actions button{
+    flex:1; padding:12px; border-radius:12px; font-size:13.5px; font-weight:500;
+    background:var(--card-2); border:1px solid var(--border-glass); color:var(--cream);
+    display:flex; align-items:center; justify-content:center; gap:8px;
+  }
+  .quick-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:16px;}
+  .quick-card{
+    background:var(--card-2); border-radius:16px; padding:20px 16px;
+    text-align:center; border:1px solid var(--border-glass);
+    cursor:pointer; transition:.25s;
+  }
+  .quick-card:hover{border-color:rgba(244,201,93,0.35); transform:translateY(-3px);}
+  .quick-card .q-icon{font-size:22px; margin-bottom:10px;}
+  .quick-card p{font-size:13px; font-weight:500;}
+
+  .ai-search-input input{
+    flex:1; background:transparent; border:none; outline:none;
+    color:var(--cream); font-family:'Poppins',sans-serif;
+    font-size:14.5px; font-weight:300; min-width:0;
+  }
+  .ai-search-input input::placeholder{color:var(--grey);}
+  .ai-search-actions button{cursor:pointer;}
+  .ai-search-actions button:hover{background:rgba(244,201,93,0.14); border-color:rgba(244,201,93,0.3);}
+  .ai-search-actions button:disabled{opacity:.6; cursor:not-allowed;}
+
+  /* ---------- MEAL PLANNER ---------- */
+  .planner-shell{background:var(--card); border:1px solid var(--border-glass); border-radius:24px; padding:28px;}
+  .planner-controls{display:grid; grid-template-columns:repeat(4,1fr) auto; gap:12px; align-items:end; margin-bottom:24px;}
+  .planner-field label{display:block; margin:0 0 7px; color:var(--grey); font-size:12px;}
+  .planner-field input,.planner-field select{width:100%; padding:11px 12px; border:1px solid var(--border-glass); border-radius:10px; outline:none; background:var(--bg); color:var(--cream); font:300 13px 'Poppins',sans-serif;}
+  .planner-generate{border:0; border-radius:10px; padding:11px 16px; color:#1a1a1a; background:linear-gradient(135deg,var(--gold),var(--orange)); font:600 13px 'Poppins',sans-serif; cursor:pointer; white-space:nowrap;}
+  .planner-generate:disabled{opacity:.65; cursor:not-allowed;}
+  .planner-grid{display:grid; grid-template-columns:repeat(7,minmax(175px,1fr)); gap:12px; overflow-x:auto; padding-bottom:8px;}
+  .planner-day{min-width:175px; border:1px solid var(--border-glass); border-radius:16px; background:var(--card-2); overflow:hidden;}
+  .planner-day h3{padding:14px 15px; font-size:14px; border-bottom:1px solid var(--border-glass); color:var(--gold);}
+  .meal-card{width:100%; padding:13px 15px; border:0; border-bottom:1px solid var(--border-glass); text-align:left; background:transparent; color:var(--cream); cursor:pointer; font-family:'Poppins',sans-serif; transition:.2s;}
+  .meal-card:last-child{border-bottom:0;}.meal-card:hover{background:rgba(244,201,93,.08);}
+  .meal-card .meal-type{display:block; color:var(--orange); font-size:10px; font-weight:600; letter-spacing:.8px; text-transform:uppercase; margin-bottom:5px;}
+  .meal-card b{display:block; font-size:12px; line-height:1.35;}.meal-card small{display:block; color:var(--grey); font-size:10.5px; margin-top:5px;}
+  .planner-empty{padding:46px 20px; color:var(--grey); text-align:center; border:1px dashed var(--border-glass); border-radius:16px; font-size:14px;}
+  .recipe-modal{position:fixed; inset:0; z-index:400; display:none; align-items:center; justify-content:center; padding:20px; background:rgba(0,0,0,.7);}.recipe-modal.open{display:flex;}
+  .recipe-modal-card{position:relative; width:min(560px,100%); max-height:85vh; overflow-y:auto; padding:28px; border:1px solid var(--border-glass); border-radius:22px; background:var(--card); box-shadow:0 30px 80px rgba(0,0,0,.55);}
+  .recipe-modal-close{position:absolute; top:14px; right:14px; width:34px; height:34px; border:1px solid var(--border-glass); border-radius:50%; background:var(--card-2); color:var(--cream); cursor:pointer; font-size:18px;}.recipe-modal h3{padding-right:34px; font-size:22px;}.recipe-modal-meta{margin:12px 0 20px; color:var(--gold); font-size:13px;}.recipe-modal p{color:var(--grey); font-size:14px; line-height:1.7;}.recipe-modal h4{margin:20px 0 8px; font-size:13px; color:var(--cream);}.recipe-modal ul,.recipe-modal ol{padding-left:20px; color:var(--grey); font-size:13px; line-height:1.8;}
+
+  /* ---------- AI RESULTS ---------- */
+  .ai-results{margin-top:22px;}
+  .ai-results:empty{display:none;}
+  .ai-loading{
+    display:flex; align-items:center; gap:12px;
+    color:var(--grey); font-size:14px; font-weight:300; padding:18px 4px;
+  }
+  .ai-spinner{
+    width:18px; height:18px; border-radius:50%;
+    border:2px solid var(--border-glass); border-top-color:var(--gold);
+    animation:spin .8s linear infinite; flex-shrink:0;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .ai-error{
+    background:rgba(233,96,96,0.1); border:1px solid rgba(233,96,96,0.3);
+    color:#f2a3a3; font-size:13.5px; padding:16px 18px; border-radius:14px; line-height:1.6;
+  }
+  .ai-recipe-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:16px; margin-top:6px;}
+  .ai-recipe-card{
+    background:var(--card-2); border:1px solid var(--border-glass);
+    border-radius:16px; padding:20px; transition:.25s;
+  }
+  .ai-recipe-card:hover{border-color:rgba(244,201,93,0.3); transform:translateY(-3px);}
+  .ai-recipe-card h4{font-size:15.5px; font-weight:600; margin-bottom:8px;}
+  .ai-recipe-card .ai-recipe-meta{display:flex; gap:12px; flex-wrap:wrap; margin-bottom:10px;}
+  .ai-recipe-card .ai-recipe-meta span{font-size:11.5px; color:var(--gold); background:rgba(244,201,93,0.1); padding:4px 10px; border-radius:100px;}
+  .ai-recipe-card p{font-size:13px; color:var(--grey); line-height:1.6; font-weight:300; margin-bottom:10px;}
+  .ai-recipe-card .ai-recipe-ing{font-size:12.5px; color:var(--cream); line-height:1.7; font-weight:300;}
+  .ai-recipe-card .ai-recipe-ing b{color:var(--gold); font-weight:600;}
+
+  .toast{
+    position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(0);
+    background:var(--card-2); border:1px solid var(--border-glass);
+    color:var(--cream); font-size:13.5px; font-weight:500;
+    padding:13px 22px; border-radius:100px; z-index:300;
+    box-shadow:0 14px 34px rgba(0,0,0,0.4);
+    opacity:0; pointer-events:none; transition:.35s ease;
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(-8px);}
+
+  @media(max-width:600px){
+    .ai-recipe-grid{grid-template-columns:1fr;}
+  }
+
+  /* ---------- FLO CHATBOT WIDGET ---------- */
+  .chat-toggle{
+    position:fixed; bottom:24px; right:24px; z-index:250;
+    width:58px; height:58px; border-radius:50%; border:none; cursor:pointer;
+    background:linear-gradient(135deg, var(--gold), var(--orange));
+    color:#1a1a1a; font-size:24px;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 14px 30px rgba(242,154,56,0.4);
+    transition:.25s;
+  }
+  .chat-toggle:hover{transform:translateY(-3px) scale(1.05);}
+  .chat-panel{
+    position:fixed; bottom:96px; right:24px; z-index:250;
+    width:340px; max-width:calc(100vw - 32px);
+    height:460px; max-height:calc(100vh - 140px);
+    background:var(--card); border:1px solid var(--border-glass);
+    border-radius:22px; box-shadow:0 30px 70px rgba(0,0,0,0.5);
+    display:flex; flex-direction:column; overflow:hidden;
+    opacity:0; transform:translateY(16px) scale(.98); pointer-events:none;
+    transition:.25s ease;
+  }
+  .chat-panel.open{opacity:1; transform:translateY(0) scale(1); pointer-events:auto;}
+  .chat-header{padding:16px 18px; border-bottom:1px solid var(--border-glass); background:var(--card-2);}
+  .chat-header-info{display:flex; align-items:center; gap:12px;}
+  .chat-voice-btn{margin-left:auto; border:1px solid var(--border-glass); background:var(--bg); color:var(--cream); border-radius:9px; padding:7px 9px; cursor:pointer; font-size:14px;}
+  .chat-voice-btn.active{border-color:var(--gold); color:var(--gold);}
+  .chat-avatar{
+    width:38px; height:38px; border-radius:50%; background:var(--card);
+    display:flex; align-items:center; justify-content:center; font-size:18px;
+    border:1px solid var(--border-glass); flex-shrink:0;
+  }
+  .chat-header-info b{font-size:14.5px; display:block;}
+  .chat-header-info span{font-size:11.5px; color:var(--grey);}
+  .chat-body{flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px;}
+  .chat-bubble{
+    max-width:82%; padding:10px 14px; border-radius:14px;
+    font-size:13.5px; line-height:1.55; font-weight:300; white-space:pre-wrap;
+  }
+  .chat-bot{
+    align-self:flex-start; background:var(--card-2);
+    border:1px solid var(--border-glass); border-bottom-left-radius:4px;
+  }
+  .chat-user{
+    align-self:flex-end;
+    background:linear-gradient(135deg, rgba(244,201,93,0.25), rgba(242,154,56,0.14));
+    border:1px solid rgba(244,201,93,0.3); border-bottom-right-radius:4px;
+  }
+  .chat-input-row{
+    display:flex; align-items:center; gap:8px;
+    padding:12px; border-top:1px solid var(--border-glass); background:var(--card-2);
+  }
+  .chat-input-row input{
+    flex:1; background:var(--bg); border:1px solid var(--border-glass);
+    border-radius:100px; padding:11px 16px; color:var(--cream);
+    font-family:'Poppins',sans-serif; font-size:13.5px; outline:none; min-width:0;
+  }
+  .chat-input-row button{
+    width:38px; height:38px; border-radius:50%; border:none; cursor:pointer; flex-shrink:0;
+    background:linear-gradient(135deg, var(--gold), var(--orange)); color:#1a1a1a; font-size:15px;
+  }
+
+  @media(max-width:480px){
+    .chat-toggle{bottom:18px; right:18px; width:52px; height:52px; font-size:21px;}
+    .chat-panel{
+      bottom:0; right:0; left:0; width:100%; max-width:100%;
+      height:78vh; max-height:78vh; border-radius:22px 22px 0 0;
+    }
+  }
+
+  /* ---------- TESTIMONIALS ---------- */
+  .testi-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:24px;}
+  .testi-card{background:var(--card); border:1px solid var(--border-glass); border-radius:20px; padding:30px;}
+  .stars{color:var(--gold); font-size:14px; margin-bottom:16px; letter-spacing:2px;}
+  .testi-card p.quote{font-size:15px; color:var(--cream); line-height:1.75; font-weight:300; margin-bottom:22px;}
+  .testi-person{display:flex; align-items:center; gap:12px;}
+  .avatar{width:42px; height:42px; border-radius:50%; overflow:hidden; flex-shrink:0;}
+  .testi-person b{font-size:14px; display:block;}
+  .testi-person span{font-size:12px; color:var(--grey);}
+
+  /* ---------- STATS ---------- */
+  .stats-bar{
+    display:grid; grid-template-columns:repeat(4,1fr);
+    background:var(--card); border:1px solid var(--border-glass); border-radius:24px;
+    padding:44px 20px;
+  }
+  .stat-block{text-align:center; border-right:1px solid var(--border-glass);}
+  .stat-block:last-child{border-right:none;}
+  .stat-block b{
+    font-size:38px; font-weight:700;
+    background:linear-gradient(135deg, var(--gold), var(--orange));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    display:block;
+  }
+  .stat-block span{font-size:13.5px; color:var(--grey);}
+
+  /* ---------- FAQ ---------- */
+  .faq-item{
+    background:var(--card); border:1px solid var(--border-glass); border-radius:16px;
+    padding:22px 26px; margin-bottom:14px; cursor:pointer;
+  }
+  .faq-q{display:flex; align-items:center; justify-content:space-between; font-weight:500; font-size:15.5px;}
+  .faq-q span.icon{color:var(--gold); font-size:20px;}
+  .faq-a{color:var(--grey); font-size:14px; line-height:1.7; margin-top:14px; font-weight:300; display:none;}
+  .faq-item.open .faq-a{display:block;}
+  .faq-item.open .icon{transform:rotate(45deg);}
+
+  /* ---------- CTA BAND ---------- */
+  .cta-band{
+    position:relative; border-radius:32px; overflow:hidden; padding:80px 60px; text-align:center;
+  }
+  .cta-band img{position:absolute; inset:0; filter:brightness(0.4) saturate(1.1);}
+  .cta-band::after{content:""; position:absolute; inset:0; background:linear-gradient(135deg, rgba(244,201,93,0.25), rgba(23,23,23,0.85));}
+  .cta-inner{position:relative; z-index:2; max-width:560px; margin:0 auto;}
+  .cta-inner h2{font-size:clamp(28px,3.4vw,40px); font-weight:700; margin-bottom:18px;}
+  .cta-inner p{color:var(--cream); font-size:15.5px; margin-bottom:32px; font-weight:300; opacity:.9;}
+
+  /* ---------- FOOTER ---------- */
+  footer{border-top:1px solid var(--border-glass); padding:64px 0 30px;}
+  .footer-grid{display:grid; grid-template-columns:1.6fr 1fr 1fr 1fr; gap:40px; margin-bottom:50px;}
+  .footer-brand p{color:var(--grey); font-size:14px; margin-top:14px; line-height:1.7; font-weight:300; max-width:280px;}
+  .footer-col h5{font-size:13px; text-transform:uppercase; letter-spacing:1px; color:var(--gold); margin-bottom:18px; font-weight:600;}
+  .footer-col a{display:block; color:var(--grey); font-size:14px; margin-bottom:12px; transition:.2s;}
+  .footer-col a:hover{color:var(--cream);}
+  .footer-bottom{display:flex; justify-content:space-between; align-items:center; padding-top:26px; border-top:1px solid var(--border-glass); font-size:13px; color:var(--grey); flex-wrap:wrap; gap:12px;}
+
+  /* ---------- BOTTOM NAV (mobile mock) ---------- */
+  .bottom-nav-preview{
+    max-width:400px; margin:60px auto 0;
+    background:rgba(35,35,35,0.75); backdrop-filter:blur(16px);
+    border:1px solid var(--border-glass);
+    border-radius:24px; padding:16px 10px;
+    display:flex; justify-content:space-around;
+  }
+  .bn-item{display:flex; flex-direction:column; align-items:center; gap:6px; font-size:10.5px; color:var(--grey); font-weight:500;}
+  .bn-item.active{color:var(--gold);}
+  .bn-icon{font-size:19px;}
+
+  /* ---------- RESPONSIVE ---------- */
+  @media(max-width:1024px){
+    .steps, .features-grid, .recipes-grid, .testi-grid{grid-template-columns:repeat(2,1fr);}
+    .quick-grid{grid-template-columns:repeat(2,1fr);}
+    .footer-grid{grid-template-columns:1fr 1fr;}
+    .stats-bar{grid-template-columns:repeat(2,1fr); gap:24px;}
+    .stat-block{border-right:none; border-bottom:1px solid var(--border-glass); padding-bottom:20px; padding-top:6px;}
+    .planner-controls{grid-template-columns:repeat(2,1fr);}
+  }
+  @media(max-width:768px){
+    .nav-links{display:none;}
+    .nav-cta{display:none;}
+    .nav-burger{display:flex;}
+    .wrap{padding:0 22px;}
+    .steps, .features-grid, .recipes-grid, .testi-grid, .quick-grid, .footer-grid{grid-template-columns:1fr;}
+    .hero-stats{gap:26px; flex-wrap:wrap;}
+    .cta-band{padding:56px 26px;}
+    .floaters{display:none;}
+    section{padding:76px 0;}
+    .section-head{margin-bottom:44px;}
+    .dash-wrap{padding:24px 20px;}
+    .ai-search{padding:20px 18px;}
+    .ai-search-actions{flex-wrap:wrap;}
+    .ai-search-actions button{min-width:calc(50% - 5px); flex:1 1 calc(50% - 5px);}
+  }
+  @media(max-width:430px){
+    .wrap{padding:0 18px;}
+    .hero{padding-bottom:56px;}
+    .hero h1{font-size:clamp(32px,9vw,42px);}
+    .hero p.sub{font-size:15.5px;}
+    .hero-actions{gap:12px;}
+    .btn-primary, .btn-secondary{padding:14px 22px; font-size:14px; width:100%; justify-content:center;}
+    .hero-stats{gap:18px 28px;}
+    .hero-stats .stat b{font-size:21px;}
+    .step-card, .feature-card, .testi-card{padding:26px 20px;}
+    .recipe-meta{flex-wrap:wrap; row-gap:8px;}
+    .recipe-body{padding:18px 18px 22px;}
+    .dash-top{flex-wrap:wrap; gap:14px;}
+    .greeting h3{font-size:20px;}
+    .ai-search-actions{flex-direction:column;}
+    .ai-search-actions button{min-width:100%; flex:1 1 100%;}
+    .quick-grid{grid-template-columns:repeat(2,1fr);}
+    .planner-shell{padding:18px;}.planner-controls{grid-template-columns:1fr;}.planner-generate{width:100%;}
+    .stats-bar{padding:30px 16px;}
+    .stat-block b{font-size:28px;}
+    .cta-band{padding:44px 18px;}
+    .cta-inner p{font-size:14px;}
+    .footer-grid{grid-template-columns:1fr; gap:32px;}
+    .footer-bottom{flex-direction:column; align-items:flex-start;}
+    .bottom-nav-preview{max-width:100%; padding:14px 4px;}
+    .bn-item{font-size:9.5px;}
+  }
+  @media(max-width:768px){
+    .nav-mobile-panel{display:flex;}
+  }
+</style>
+</head>
+<body>
+
+<nav id="mainNav">
+  <div class="wrap nav-inner">
+    <div class="logo"><div class="logo-mark">🍋</div>AI Recipe Finder</div>
+    <div class="nav-links">
+      <a href="#home">Home</a>
+      <a href="#recipes">Recipes</a>
+      <a href="#kitchen">AI Kitchen</a>
+      <a href="#features">Features</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+    </div>
+    <a href="#kitchen" class="nav-cta">Get Started</a>
+    <div class="nav-burger" id="navBurger" aria-label="Open menu" role="button" tabindex="0">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+  <div class="nav-mobile-panel" id="navMobilePanel">
+    <a href="#home">Home</a>
+    <a href="#recipes">Recipes</a>
+    <a href="#kitchen">AI Kitchen</a>
+    <a href="#features">Features</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+    <a href="#kitchen" class="nav-cta">Get Started</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home" style="padding-top:0;">
+  <div class="hero-bg">
+    <img src="https://images.unsplash.com/photo-1600891964599-f61ba0e24092?q=80&w=1800&auto=format&fit=crop" alt="">
+  </div>
+  <div class="floaters">
+    <div class="chip" style="top:22%; left:6%; animation-delay:0s;"><span class="dot"></span>Garlic</div>
+    <div class="chip" style="top:15%; right:10%; animation-delay:.8s;"><span class="dot"></span>Rosemary</div>
+    <div class="chip" style="top:58%; right:6%; animation-delay:1.6s;"><span class="dot"></span>Lemon</div>
+    <div class="chip" style="top:72%; left:9%; animation-delay:2.4s;"><span class="dot"></span>Butter</div>
+    <div class="chip" style="top:40%; right:22%; animation-delay:1.2s;"><span class="dot"></span>Pepper</div>
+    <div class="chip" style="top:82%; right:28%; animation-delay:2s;"><span class="dot"></span>Herbs</div>
+  </div>
+  <div class="wrap hero-content">
+    <div class="eyebrow">✨ Powered by AI</div>
+    <h1>What are you<br><em>craving</em> tonight?</h1>
+    <p class="sub">Discover amazing recipes using ingredients already in your kitchen. Let AI become your personal chef.</p>
+    <div class="hero-actions">
+      <a href="#kitchen" class="btn-primary">✨ Let AI Cook For You</a>
+      <a href="#scan" class="btn-secondary">📷 Scan Ingredients</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><b>128K+</b><span>Recipes generated</span></div>
+      <div class="stat"><b>4.9 ★</b><span>App Store rating</span></div>
+      <div class="stat"><b>92%</b><span>Match accuracy</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="kitchen">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-eyebrow">How it works</div>
+      <h2>From fridge to feast in three steps</h2>
+      <p>No more staring at random ingredients wondering what to cook. Let our AI chef take it from here.</p>
+    </div>
+    <div class="steps">
+      <div class="step-card">
+        <div class="step-num">01</div>
+        <div class="step-icon">📷</div>
+        <h3>Scan or type</h3>
+        <p>Snap a photo of your fridge or pantry, or simply type what you've got on hand.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">02</div>
+        <div class="step-icon">✨</div>
+        <h3>AI matches recipes</h3>
+        <p>Our model instantly ranks recipes by ingredient match, taste profile, and nutrition goals.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">03</div>
+        <div class="step-icon">🍽️</div>
+        <h3>Cook with confidence</h3>
+        <p>Follow step-by-step guidance, built-in timers, and chef tips until the plate is ready.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AI FEATURES -->
+<section id="features">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-eyebrow">AI features</div>
+      <h2>A personal chef in your pocket</h2>
+      <p>Every feature is designed to make cooking feel effortless, personal, and a little luxurious.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card"><div class="f-icon">📷</div><h4>Ingredient scanner</h4><p>Point your camera and let AI identify every ingredient in seconds.</p></div>
+      <div class="feature-card"><div class="f-icon">🧠</div><h4>Recipe generator</h4><p>Smart recipes built from exactly what you have — nothing wasted.</p></div>
+      <div class="feature-card"><div class="f-icon">🔄</div><h4>Substitutions</h4><p>Missing an ingredient? Get instant, sensible swaps.</p></div>
+      <div class="feature-card"><div class="f-icon">📊</div><h4>Nutrition analysis</h4><p>Calories, macros, and micronutrients calculated automatically.</p></div>
+      <div class="feature-card"><div class="f-icon">👨‍🍳</div><h4>AI chef tips</h4><p>Pro techniques and timing cues, right when you need them.</p></div>
+      <div class="feature-card"><div class="f-icon">🎯</div><h4>Personalised picks</h4><p>Recommendations that adapt to your taste and goals over time.</p></div>
+      <div class="feature-card"><div class="f-icon">🗓️</div><h4>Meal planner</h4><p>A full week of meals planned around your schedule.</p></div>
+      <div class="feature-card"><div class="f-icon">🛒</div><h4>Shopping list</h4><p>Auto-generated lists, organised by aisle.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- POPULAR RECIPES -->
+<section id="recipes">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-eyebrow">Popular this week</div>
+      <h2>Recipes people are loving</h2>
+      <p>Editor's picks and community favourites, matched to what's trending in kitchens right now.</p>
+    </div>
+    <div class="recipes-grid">
+      <div class="recipe-card">
+        <div class="recipe-img">
+          <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=900&auto=format&fit=crop" alt="Herb roasted chicken">
+          <div class="match-badge">● 96% match</div>
+          <div class="fav-badge">♡</div>
+        </div>
+        <div class="recipe-body">
+          <h3>Herb Roasted Chicken</h3>
+          <div class="recipe-meta">
+            <span>⏱ 45 min</span>
+            <span>📈 Medium</span>
+            <span>🔥 420 kcal</span>
+          </div>
+          <div class="recipe-foot">
+            <span class="cals">32g protein</span>
+            <span class="actions">♡ ⇪ ⇓</span>
+          </div>
+        </div>
+      </div>
+      <div class="recipe-card">
+        <div class="recipe-img">
+          <img src="https://images.unsplash.com/photo-1473093295043-cdd812d0e601?q=80&w=900&auto=format&fit=crop" alt="Creamy mushroom risotto">
+          <div class="match-badge">● 91% match</div>
+          <div class="fav-badge">♡</div>
+        </div>
+        <div class="recipe-body">
+          <h3>Creamy Mushroom Risotto</h3>
+          <div class="recipe-meta">
+            <span>⏱ 35 min</span>
+            <span>📈 Easy</span>
+            <span>🔥 380 kcal</span>
+          </div>
+          <div class="recipe-foot">
+            <span class="cals">14g protein</span>
+            <span class="actions">♡ ⇪ ⇓</span>
+          </div>
+        </div>
+      </div>
+      <div class="recipe-card">
+        <div class="recipe-img">
+          <img src="https://images.unsplash.com/photo-1467003909585-2f8a72700288?q=80&w=900&auto=format&fit=crop" alt="Seared salmon citrus glaze">
+          <div class="match-badge">● 88% match</div>
+          <div class="fav-badge">♡</div>
+        </div>
+        <div class="recipe-body">
+          <h3>Seared Salmon, Citrus Glaze</h3>
+          <div class="recipe-meta">
+            <span>⏱ 25 min</span>
+            <span>📈 Easy</span>
+            <span>🔥 340 kcal</span>
+          </div>
+          <div class="recipe-foot">
+            <span class="cals">36g protein</span>
+            <span class="actions">♡ ⇪ ⇓</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DASHBOARD PREVIEW -->
+<section id="dashboard">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-eyebrow">Inside the app</div>
+      <h2>Your kitchen, reimagined</h2>
+      <p>A calm, premium dashboard that gets you from craving to cooking in seconds.</p>
+    </div>
+    <div class="dash-wrap">
+      <div class="dash-top">
+        <div class="greeting"><h3>Good Evening, Chef 👋</h3><p>What's in your kitchen tonight?</p></div>
+        <div class="dash-icons"><div>🔔</div><div>⚙️</div><div>👤</div></div>
+      </div>
+      <div class="ai-search">
+        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+          <span style="font-weight:600; font-size:15px;">✨ Ask your AI chef</span>
+          <span style="font-size:12px; color:var(--grey);">🎙️ Voice ready</span>
+        </div>
+        <form id="aiSearchForm" class="ai-search-input" style="cursor:text;">
+          <span>🔍</span>
+          <input id="ingredientsInput" type="text" placeholder='Try &quot;chicken, lemon, garlic, rosemary…&quot;' autocomplete="off">
+        </form>
+        <div class="ai-search-actions">
+          <button type="button" id="scanBtn">📷 Scan ingredients</button>
+          <button type="button" id="voiceBtn">🎙️ Voice search</button>
+          <button type="button" id="generateBtn">✨ Generate recipes</button>
+        </div>
+      </div>
+      <div class="quick-grid">
+        <div class="quick-card" data-quick="scan"><div class="q-icon">📷</div><p>Scan</p></div>
+        <div class="quick-card" data-quick="generate"><div class="q-icon">✨</div><p>Generate</p></div>
+        <div class="quick-card" data-quick="shopping"><div class="q-icon">🛒</div><p>Shopping list</p></div>
+        <div class="quick-card" data-quick="planner"><div class="q-icon">🗓️</div><p>Meal planner</p></div>
+      </div>
+      <div id="aiResults" class="ai-results"></div>
+      <div id="shoppingListPanel" class="shopping-list-panel">
+        <div class="shopping-list-top">
+          <div>
+            <h3>🛒 Shopping list</h3>
+            <p>Ingredients from the recipes you add</p>
+          </div>
+          <button id="clearShoppingListBtn" class="shopping-list-clear" type="button">Clear all</button>
+        </div>
+        <div id="shoppingListEmpty" class="shopping-list-empty">Add a recipe to start your list.</div>
+        <div id="shoppingListItems" class="shopping-list-items"></div>
+      </div>
+    </div>
+    <div class="bottom-nav-preview">
+      <div class="bn-item active"><span class="bn-icon">🏠</span>Home</div>
+      <div class="bn-item"><span class="bn-icon">🔎</span>Discover</div>
+      <div class="bn-item"><span class="bn-icon">✨</span>AI Kitchen</div>
+      <div class="bn-item"><span class="bn-icon">🗓️</span>Planner</div>
+      <div class="bn-item"><span class="bn-icon">👤</span>Profile</div>
+    </div>
+  </div>
+</section>
+
+<!-- MEAL PLANNER -->
+<section id="meal-planner">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-eyebrow">Weekly meal planner</div>
+      <h2>Your week, deliciously planned</h2>
+      <p>Tell the AI what works for you, then tap any meal for its recipe details.</p>
+    </div>
+    <div class="planner-shell">
+      <div class="planner-controls">
+        <div class="planner-field"><label for="dietType">Diet type</label><select id="dietType"><option>No preference</option><option>Vegetarian</option><option>Vegan</option><option>Low carb</option><option>High protein</option><option>Mediterranean</option></select></div>
+        <div class="planner-field"><label for="calorieGoal">Daily calorie goal</label><select id="calorieGoal"><option>Balanced</option><option>1,500 kcal</option><option>1,800 kcal</option><option>2,000 kcal</option><option>2,500 kcal</option></select></div>
+        <div class="planner-field"><label for="plannerIngredients">Available ingredients</label><input id="plannerIngredients" type="text" placeholder="e.g. chicken, rice, tomatoes"></div>
+        <div class="planner-field"><label for="allergies">Allergies / avoid</label><input id="allergies" type="text" placeholder="e.g. nuts, dairy"></div>
+        <button id="generatePlanBtn" class="planner-generate" type="button">✨ Generate plan</button>
+      </div>
+      <div id="plannerResults"><div class="planner-empty">Your seven-day meal plan will appear here.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section style="padding-top:0;">
+  <div class="wrap">
+    <div class="stats-bar">
+      <div class="stat-block"><b>2.4M</b><span>Home cooks served</span></div>
+      <div class="stat-block"><b>18K+</b><span>Curated recipes</span></div>
+      <div class="stat-block"><b>96%</b><span>Would recommend</span></div>
+      <div class="stat-block"><b>40+</b><span>Cuisines covered</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="about">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-eyebrow">Loved by home cooks</div>
+      <h2>What our members are saying</h2>
+    </div>
+    <div class="testi-grid">
+      <div class="testi-card">
+        <div class="stars">★★★★★</div>
+        <p class="quote">This app completely changed how I use my fridge — nothing goes to waste anymore, and every dinner feels intentional.</p>
+        <div class="testi-person">
+          <div class="avatar"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop" alt=""></div>
+          <div><b>Maya Chen</b><span>Home cook, Toronto</span></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="stars">★★★★★</div>
+        <p class="quote">The scanner is scary accurate, and the substitution suggestions have saved more than one dinner party.</p>
+        <div class="testi-person">
+          <div class="avatar"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop" alt=""></div>
+          <div><b>Daniel Osei</b><span>Weekend chef, London</span></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="stars">★★★★★</div>
+        <p class="quote">It genuinely feels like a private chef in my pocket. The whole app just feels expensive and calm.</p>
+        <div class="testi-person">
+          <div class="avatar"><img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200&auto=format&fit=crop" alt=""></div>
+          <div><b>Sofia Marín</b><span>Food blogger, Madrid</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section>
+  <div class="wrap" style="max-width:820px;">
+    <div class="section-head">
+      <div class="section-eyebrow">FAQ</div>
+      <h2>Good to know</h2>
+    </div>
+    <div class="faq-item open">
+      <div class="faq-q">Is the ingredient scanner free to use? <span class="icon">+</span></div>
+      <div class="faq-a">Yes — scanning and basic recipe generation are free. Advanced meal planning and nutrition tracking are part of the premium plan.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Does it work with dietary restrictions? <span class="icon">+</span></div>
+      <div class="faq-a">Absolutely. Set your preferences once — vegan, gluten-free, low-carb and more — and every suggestion respects them automatically.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Can I use it without scanning anything? <span class="icon">+</span></div>
+      <div class="faq-a">Yes, you can simply type the ingredients you have and get the same AI-matched recipes.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BAND -->
+<section>
+  <div class="wrap">
+    <div class="cta-band">
+      <img src="https://images.unsplash.com/photo-1495521821757-a1efb6729352?q=80&w=1600&auto=format&fit=crop" alt="">
+      <div class="cta-inner">
+        <h2>Your next favourite meal is already in your kitchen</h2>
+        <p>Join thousands of home cooks turning everyday ingredients into extraordinary meals.</p>
+        <a href="#kitchen" class="btn-primary">✨ Start Cooking with AI</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer id="contact">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo"><div class="logo-mark">🍋</div>AI Recipe Finder</div>
+        <p>A luxury AI-powered kitchen companion — turning what you already have into something worth savouring.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Product</h5>
+        <a href="#recipes">Recipes</a>
+        <a href="#kitchen">AI Kitchen</a>
+        <a href="#features">Features</a>
+        <a href="#dashboard">Dashboard</a>
+      </div>
+      <div class="footer-col">
+        <h5>Company</h5>
+        <a href="#about">About</a>
+        <a href="#">Careers</a>
+        <a href="#">Press</a>
+        <a href="#contact">Contact</a>
+      </div>
+      <div class="footer-col">
+        <h5>Legal</h5>
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="#">Cookies</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 AI Recipe Finder. All rights reserved.</span>
+      <span>Made for people who love good food.</span>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<!-- Recipe details shown when a planned meal is selected -->
+<div id="recipeModal" class="recipe-modal" role="dialog" aria-modal="true" aria-labelledby="recipeModalTitle">
+  <div class="recipe-modal-card">
+    <button id="recipeModalClose" class="recipe-modal-close" type="button" aria-label="Close recipe details">×</button>
+    <div id="recipeModalContent"></div>
+  </div>
+</div>
+
+<input type="file" id="scanFileInput" accept="image/*" capture="environment" style="display:none">
+
+<!-- FLO CHATBOT WIDGET -->
+<button id="chatToggle" class="chat-toggle" aria-label="Open chat with Flo">💬</button>
+<div id="chatPanel" class="chat-panel">
+  <div class="chat-header">
+    <div class="chat-header-info">
+      <div class="chat-avatar">👩‍🍳</div>
+      <div>
+        <b>Flo</b>
+        <span>Your AI cooking assistant</span>
+      </div>
+      <button id="chatVoiceBtn" class="chat-voice-btn" type="button" aria-label="Turn on Flo's voice" title="Turn on Flo's voice">🔊</button>
+    </div>
+  </div>
+  <div id="chatBody" class="chat-body"></div>
+  <form id="chatForm" class="chat-input-row">
+    <input id="chatInput" type="text" placeholder="Ask Flo anything about cooking…" autocomplete="off">
+    <button id="chatMicBtn" type="button" aria-label="Speak to Flo" title="Speak to Flo">🎙️</button>
+    <button type="submit" aria-label="Send">➤</button>
+  </form>
+</div>
+
+<script>
+  window.addEventListener('scroll', function(){
+    document.getElementById('mainNav').classList.toggle('scrolled', window.scrollY > 40);
+  });
+
+  // Mobile hamburger menu
+  var navBurger = document.getElementById('navBurger');
+  var navMobilePanel = document.getElementById('navMobilePanel');
+  function closeMobileNav(){
+    navBurger.classList.remove('open');
+    navMobilePanel.classList.remove('open');
+  }
+  navBurger.addEventListener('click', function(){
+    navBurger.classList.toggle('open');
+    navMobilePanel.classList.toggle('open');
+  });
+  navMobilePanel.querySelectorAll('a').forEach(function(a){
+    a.addEventListener('click', closeMobileNav);
+  });
+  /* ==============================================================
+     AI RECIPE GENERATION — now calls our own server (server.js),
+     which holds the Gemini API key. No key is ever exposed here.
+  ============================================================== */
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(function(){ t.classList.remove('show'); }, 2600);
+  }
+
+  const SHOPPING_LIST_KEY = 'aiRecipeFinderShoppingList';
+  let shoppingList = [];
+
+  function loadShoppingList(){
+    try{
+      const saved = JSON.parse(localStorage.getItem(SHOPPING_LIST_KEY) || '[]');
+      return Array.isArray(saved) ? saved : [];
+    }catch(err){
+      return [];
+    }
+  }
+
+  function saveShoppingList(list){
+    shoppingList = list;
+    localStorage.setItem(SHOPPING_LIST_KEY, JSON.stringify(list));
+    renderShoppingList();
+  }
+
+  function normalizeIngredientName(value){
+    return String(value || '').toLowerCase().trim()
+      .replace(/^((\d+\s*\d*\/\d+|\d+(?:\.\d+)?))(?:\s*(?:cups?|cup|tbsp|tsp|cloves?|clove|lb|lbs|kg|g|gram|grams|oz|ounce|ounces|ml|l|liter|liters|pinch|pinches|can|cans|packet|packets|box|boxes|bunch|bunches|slice|slices|stick|sticks|piece|pieces|handful|handfuls))?/i, '')
+      .replace(/\b(tbsp|tsp|cup|cups|clove|cloves|can|cans|packet|packets|box|boxes|bunch|bunches|lb|lbs|kg|g|gram|grams|oz|ounce|ounces|ml|l|liter|liters|pinch|pinches|slice|slices|stick|sticks|piece|pieces|handful|handfuls)\b/g, '')
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim()
+      .replace(/\s+/g, ' ')
+      .replace(/s$/,'');
+  }
+
+  function inferIngredientCategory(value){
+    const text = String(value || '').toLowerCase();
+    if(/\b(chicken|beef|pork|turkey|salmon|tuna|fish|shrimp|sausage|bacon|ham|steak|meat)\b/.test(text)) return 'Meat';
+    if(/\b(milk|cream|butter|cheese|yogurt|cream cheese|custard)\b/.test(text)) return 'Dairy';
+    if(/\b(apple|banana|orange|lemon|lime|grape|pear|berry|berries|mango|pineapple|avocado|kiwi)\b/.test(text)) return 'Fruit';
+    if(/\b(onion|garlic|tomato|tomatoes|carrot|carrots|cucumber|lettuce|spinach|broccoli|cauliflower|pepper|peppers|potato|potatoes|zucchini|eggplant|peas|beans|corn|mushroom|mushrooms|celery|cabbage|radish|shallot)\b/.test(text)) return 'Vegetables';
+    if(/\b(rice|pasta|bread|flour|oats|quinoa|tortilla|tortillas|noodles|cereal|breadcrumbs|grain|grains)\b/.test(text)) return 'Grains';
+    if(/\b(salt|pepper|paprika|cumin|oregano|basil|thyme|rosemary|parsley|coriander|chili|mustard|soy|sauce|broth|oil|vinegar|honey|sugar|stock)\b/.test(text)) return 'Spices';
+    return 'Pantry';
+  }
+
+  function parseIngredientText(ingredientText){
+    const text = String(ingredientText || '').trim();
+    if(!text) return null;
+    const match = text.match(/^((\d+\s*\d*\/\d+|\d+(?:\.\d+)?))(?:\s*(?:cups?\b|tbsp\b|tsp\b|cloves?\b|clove\b|lb\b|lbs\b|kg\b|g\b|grams?\b|oz\b|ounce\b|ounces\b|ml\b|l\b|liter\b|liters\b|pinch\b|pinches\b|can\b|cans\b|packet\b|packets\b|box\b|boxes\b|bunch\b|bunches\b|slice\b|slices\b|stick\b|sticks\b|piece\b|pieces\b|handful\b|handfuls\b))?/i);
+    const amount = match ? match[0].trim() : 'to taste';
+    let name = match ? text.slice(match[0].length).trim() : text;
+    name = name.replace(/^(of|a|an)\s+/i, '').replace(/^[\s,;:.-]+/, '').replace(/\s+/g, ' ').trim();
+    return {
+      name: name || text,
+      normalizedName: normalizeIngredientName(name || text),
+      amount: amount || 'to taste',
+      category: inferIngredientCategory(name || text)
+    };
+  }
+
+  function addRecipeToShoppingList(recipe){
+    const ingredients = Array.isArray(recipe && recipe.ingredients) ? recipe.ingredients : [];
+    if(!ingredients.length){
+      showToast('This recipe has no listed ingredients to add.');
+      return;
+    }
+
+    const nextList = shoppingList.slice();
+    ingredients.forEach(function(ingredient){
+      const parsed = parseIngredientText(ingredient);
+      if(!parsed) return;
+      const existing = nextList.find(function(item){ return item.normalizedName === parsed.normalizedName; });
+      if(existing){
+        existing.amount = existing.amount && parsed.amount && existing.amount !== parsed.amount ? `${existing.amount}, ${parsed.amount}` : (existing.amount || parsed.amount);
+        existing.category = existing.category || parsed.category;
+        existing.name = existing.name || parsed.name;
+      }else{
+        nextList.push({
+          id: String(Date.now()) + Math.random().toString(16).slice(2),
+          name: parsed.name,
+          amount: parsed.amount,
+          category: parsed.category,
+          normalizedName: parsed.normalizedName,
+          purchased: false
+        });
+      }
+    });
+
+    saveShoppingList(nextList);
+    showToast(`Added ${ingredients.length} ingredient${ingredients.length === 1 ? '' : 's'} to your shopping list`);
+  }
+
+  function renderShoppingList(){
+    const emptyState = document.getElementById('shoppingListEmpty');
+    const itemsWrap = document.getElementById('shoppingListItems');
+    shoppingList = loadShoppingList();
+    if(!shoppingList.length){
+      emptyState.style.display = 'block';
+      itemsWrap.innerHTML = '';
+      return;
+    }
+    emptyState.style.display = 'none';
+    itemsWrap.innerHTML = shoppingList.map(function(item){
+      return `
+        <div class="shopping-item">
+          <input type="checkbox" ${item.purchased ? 'checked' : ''} data-id="${item.id}" aria-label="Mark ${escapeHtml(item.name)} as purchased">
+          <div class="shopping-item-main">
+            <div class="shopping-item-name ${item.purchased ? 'purchased' : ''}">${escapeHtml(item.name)}</div>
+            <div class="shopping-item-meta">
+              <span>${escapeHtml(item.amount || 'to taste')}</span>
+              <span>${escapeHtml(item.category || 'Pantry')}</span>
+            </div>
+          </div>
+          <button class="shopping-remove" type="button" data-id="${item.id}" aria-label="Remove ${escapeHtml(item.name)}">×</button>
+        </div>`;
+    }).join('');
+  }
+
+  function toggleShoppingItem(id){
+    const nextList = shoppingList.map(function(item){
+      return item.id === id ? Object.assign({}, item, { purchased: !item.purchased }) : item;
+    });
+    saveShoppingList(nextList);
+  }
+
+  function removeShoppingItem(id){
+    const nextList = shoppingList.filter(function(item){ return item.id !== id; });
+    saveShoppingList(nextList);
+  }
+
+  function clearShoppingList(){
+    saveShoppingList([]);
+    showToast('Shopping list cleared');
+  }
+
+  async function generateRecipes(ingredientsText){
+    const res = await fetch('/api/recipes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ingredients: ingredientsText })
+    });
+    const data = await res.json().catch(function(){ return {}; });
+    if(!res.ok){
+      throw new Error(data.error || `Request failed (${res.status})`);
+    }
+    return data.recipes || [];
+  }
+
+  function renderRecipes(recipes){
+    const container = document.getElementById('aiResults');
+    if(!recipes.length){
+      container.innerHTML = '<div class="ai-error">No recipes came back for those ingredients — try adding a couple more.</div>';
+      return;
+    }
+    container.innerHTML = '<div class="ai-recipe-grid">' + recipes.map(function(r){
+      const ing = (r.ingredients || []).slice(0,6).map(function(i){ return escapeHtml(i); }).join(" · ");
+      const payload = encodeURIComponent(JSON.stringify({ title: r.title || 'Untitled recipe', ingredients: r.ingredients || [] }));
+      return `
+        <div class="ai-recipe-card">
+          <h4>${escapeHtml(r.title || "Untitled recipe")}</h4>
+          <div class="ai-recipe-meta">
+            ${r.time ? `<span>⏱ ${escapeHtml(r.time)}</span>` : ""}
+            ${r.difficulty ? `<span>📈 ${escapeHtml(r.difficulty)}</span>` : ""}
+            ${r.calories ? `<span>🔥 ${escapeHtml(r.calories)}</span>` : ""}
+            ${r.match ? `<span>● ${escapeHtml(r.match)} match</span>` : ""}
+          </div>
+          <p>${escapeHtml(r.description || "")}</p>
+          <div class="ai-recipe-ing"><b>Uses:</b> ${ing}</div>
+          <div class="recipe-actions">
+            <button class="shopping-add-btn" type="button" data-recipe="${payload}">🛒 Add to list</button>
+          </div>
+        </div>`;
+    }).join("") + '</div>';
+  }
+
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, function(c){
+      return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c];
+    });
+  }
+
+  async function handleGenerate(){
+    const input = document.getElementById('ingredientsInput');
+    const ingredientsText = input.value.trim();
+    const container = document.getElementById('aiResults');
+    const btn = document.getElementById('generateBtn');
+
+    if(!ingredientsText){
+      showToast("Type a few ingredients first ✨");
+      input.focus();
+      return;
+    }
+
+    btn.disabled = true;
+    container.innerHTML = '<div class="ai-loading"><span class="ai-spinner"></span>Asking your AI chef for ideas…</div>';
+
+    try{
+      const recipes = await generateRecipes(ingredientsText);
+      renderRecipes(recipes);
+    }catch(err){
+      container.innerHTML = `<div class="ai-error">Couldn't generate recipes: ${escapeHtml(err.message || "unknown error")}.</div>`;
+    }finally{
+      btn.disabled = false;
+    }
+  }
+
+  document.getElementById('generateBtn').addEventListener('click', handleGenerate);
+  document.getElementById('aiSearchForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    handleGenerate();
+  });
+
+  document.getElementById('aiResults').addEventListener('click', function(event){
+    const button = event.target.closest('.shopping-add-btn');
+    if(!button) return;
+    try{
+      const recipe = JSON.parse(decodeURIComponent(button.getAttribute('data-recipe')));
+      addRecipeToShoppingList(recipe);
+    }catch(err){
+      showToast('Could not add that recipe to the shopping list.');
+    }
+  });
+
+  /* ==============================================================
+     INGREDIENT SCANNING — takes a photo, sends it to /api/scan,
+     and fills the ingredients box with what Gemini sees.
+  ============================================================== */
+  const scanFileInput = document.getElementById('scanFileInput');
+
+  function fileToBase64(file){
+    return new Promise(function(resolve, reject){
+      const reader = new FileReader();
+      reader.onload = function(){ resolve(reader.result.split(',')[1]); };
+      reader.onerror = function(){ reject(new Error('Could not read that file.')); };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function handleScan(file){
+    const container = document.getElementById('aiResults');
+    container.innerHTML = '<div class="ai-loading"><span class="ai-spinner"></span>Looking at your photo…</div>';
+    try{
+      const base64 = await fileToBase64(file);
+      const res = await fetch('/api/scan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageBase64: base64, mimeType: file.type || 'image/jpeg' })
+      });
+      const data = await res.json().catch(function(){ return {}; });
+      if(!res.ok){ throw new Error(data.error || `Request failed (${res.status})`); }
+
+      const ingredients = data.ingredients || [];
+      if(!ingredients.length){
+        container.innerHTML = '<div class="ai-error">Couldn\'t spot any ingredients in that photo — try a clearer shot.</div>';
+        return;
+      }
+      const input = document.getElementById('ingredientsInput');
+      input.value = ingredients.join(', ');
+      container.innerHTML = '';
+      showToast(`Found ${ingredients.length} ingredient${ingredients.length===1?'':'s'} 📷`);
+      input.focus();
+    }catch(err){
+      container.innerHTML = `<div class="ai-error">Couldn't scan that photo: ${escapeHtml(err.message || 'unknown error')}.</div>`;
+    }
+  }
+
+  document.getElementById('scanBtn').addEventListener('click', function(){
+    scanFileInput.click();
+  });
+  scanFileInput.addEventListener('change', function(){
+    if(scanFileInput.files && scanFileInput.files[0]){
+      handleScan(scanFileInput.files[0]);
+      scanFileInput.value = '';
+    }
+  });
+  // Fill the ingredient box with speech using the browser's built-in voice recognition.
+  const voiceBtn = document.getElementById('voiceBtn');
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  voiceBtn.addEventListener('click', function(){
+    if(!SpeechRecognition){
+      showToast('Voice search works in Chrome or Edge.');
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = navigator.language || 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    voiceBtn.disabled = true;
+    voiceBtn.textContent = '🎙️ Listening…';
+
+    recognition.onresult = function(event){
+      const spokenIngredients = event.results[0][0].transcript.trim();
+      const input = document.getElementById('ingredientsInput');
+      input.value = input.value.trim()
+        ? `${input.value.trim()}, ${spokenIngredients}`
+        : spokenIngredients;
+      input.focus();
+      showToast('Ingredients added from your voice ✨');
+    };
+
+    recognition.onerror = function(event){
+      const message = event.error === 'not-allowed'
+        ? 'Please allow microphone access to use voice search.'
+        : 'I couldn\'t hear that. Please try again.';
+      showToast(message);
+    };
+
+    recognition.onend = function(){
+      voiceBtn.disabled = false;
+      voiceBtn.textContent = '🎙️ Voice search';
+    };
+
+    recognition.start();
+  });
+  /* ==============================================================
+     MEAL PLANNER — creates a personalised Monday-to-Sunday plan.
+  ============================================================== */
+  const plannerResults = document.getElementById('plannerResults');
+  const generatePlanBtn = document.getElementById('generatePlanBtn');
+  const recipeModal = document.getElementById('recipeModal');
+  const recipeModalContent = document.getElementById('recipeModalContent');
+  const mealLabels = { breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner', snack: 'Snack' };
+
+  function showRecipeDetails(meal){
+    const ingredients = Array.isArray(meal.ingredients) ? meal.ingredients : [];
+    const steps = Array.isArray(meal.steps) ? meal.steps : [];
+    recipeModalContent.innerHTML = `
+      <h3 id="recipeModalTitle">${escapeHtml(meal.title || 'Recipe details')}</h3>
+      <div class="recipe-modal-meta">${escapeHtml(meal.calories || 'Nutrition not available')} · ${escapeHtml(meal.nutrition || 'Balanced meal')}</div>
+      <p>${escapeHtml(meal.description || 'A personalised meal suggestion for your week.')}</p>
+      <h4>Ingredients</h4>
+      <ul>${ingredients.map(function(item){ return `<li>${escapeHtml(item)}</li>`; }).join('') || '<li>See recipe suggestion for ingredients.</li>'}</ul>
+      <h4>Method</h4>
+      <ol>${steps.map(function(step){ return `<li>${escapeHtml(step)}</li>`; }).join('') || '<li>Prepare and cook until ready to serve.</li>'}</ol>`;
+    recipeModal.classList.add('open');
+  }
+
+  function normalizeMealPlan(payload){
+    if (Array.isArray(payload)) return payload;
+    if (payload && Array.isArray(payload.plan)) return payload.plan;
+    if (payload && payload.days && Array.isArray(payload.days)) return payload.days;
+    if (payload && payload.meals && Array.isArray(payload.meals)) return payload.meals;
+    return [];
+  }
+
+  function renderMealPlan(plan){
+    const days = normalizeMealPlan(plan);
+    plannerResults.innerHTML = '<div class="planner-grid"></div>';
+    const grid = plannerResults.firstElementChild;
+    if (!days.length) {
+      plannerResults.innerHTML = '<div class="planner-empty">No meal plan was returned. Please try again.</div>';
+      return;
+    }
+    days.forEach(function(day){
+      const dayCard = document.createElement('article');
+      dayCard.className = 'planner-day';
+      dayCard.innerHTML = `<h3>${escapeHtml(day.day || 'Day')}</h3>`;
+      ['breakfast', 'lunch', 'dinner', 'snack'].forEach(function(type){
+        const meal = day.meals && day.meals[type];
+        if(!meal) return;
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'meal-card';
+        button.innerHTML = `<span class="meal-type">${mealLabels[type]}</span><b>${escapeHtml(meal.title || 'Meal suggestion')}</b><small>${escapeHtml(meal.calories || '')}</small>`;
+        button.addEventListener('click', function(){ showRecipeDetails(meal); });
+        dayCard.appendChild(button);
+      });
+      grid.appendChild(dayCard);
+    });
+  }
+
+  generatePlanBtn.addEventListener('click', async function(){
+    generatePlanBtn.disabled = true;
+    generatePlanBtn.textContent = 'Planning…';
+    plannerResults.innerHTML = '<div class="planner-empty"><span class="ai-spinner"></span> Creating your personalised week…</div>';
+    try{
+      const res = await fetch('/api/meal-plan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          dietType: document.getElementById('dietType').value,
+          calorieGoal: document.getElementById('calorieGoal').value,
+          ingredients: document.getElementById('plannerIngredients').value,
+          allergies: document.getElementById('allergies').value
+        })
+      });
+      const data = await res.json().catch(function(){ return {}; });
+      if(!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+      renderMealPlan(data.plan || data);
+    }catch(err){
+      plannerResults.innerHTML = `<div class="planner-empty">Couldn't create your meal plan: ${escapeHtml(err.message || 'unknown error')}.</div>`;
+    }finally{
+      generatePlanBtn.disabled = false;
+      generatePlanBtn.textContent = '✨ Generate new plan';
+    }
+  });
+
+  document.getElementById('recipeModalClose').addEventListener('click', function(){ recipeModal.classList.remove('open'); });
+  recipeModal.addEventListener('click', function(event){ if(event.target === recipeModal) recipeModal.classList.remove('open'); });
+
+  document.getElementById('clearShoppingListBtn').addEventListener('click', clearShoppingList);
+  document.getElementById('shoppingListItems').addEventListener('change', function(event){
+    if(event.target.matches('input[type="checkbox"]')){
+      toggleShoppingItem(event.target.getAttribute('data-id'));
+    }
+  });
+  document.getElementById('shoppingListItems').addEventListener('click', function(event){
+    const button = event.target.closest('.shopping-remove');
+    if(button){
+      removeShoppingItem(button.getAttribute('data-id'));
+    }
+  });
+
+  shoppingList = loadShoppingList();
+  renderShoppingList();
+
+  document.querySelectorAll('.quick-card').forEach(function(card){
+    card.addEventListener('click', function(){
+      const kind = card.dataset.quick;
+      if(kind === 'generate'){
+        document.getElementById('ingredientsInput').focus();
+        document.getElementById('dashboard').scrollIntoView({behavior:'smooth', block:'center'});
+      }else if(kind === 'scan'){
+        scanFileInput.click();
+      }else if(kind === 'shopping'){
+        document.getElementById('shoppingListPanel').scrollIntoView({behavior:'smooth', block:'start'});
+      }else if(kind === 'planner'){
+        document.getElementById('meal-planner').scrollIntoView({behavior:'smooth', block:'start'});
+      }
+    });
+  });
+
+  // Favorite (heart) toggle on recipe cards
+  document.querySelectorAll('.fav-badge').forEach(function(badge){
+    badge.style.cursor = 'pointer';
+    badge.addEventListener('click', function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      const active = badge.classList.toggle('active');
+      badge.textContent = active ? '♥' : '♡';
+      badge.style.color = active ? 'var(--gold)' : '';
+      showToast(active ? 'Saved to favourites' : 'Removed from favourites');
+    });
+  });
+
+  /* ==============================================================
+     FLO — the chatbot widget. Calls /api/chat and keeps a short
+     in-memory history for context (not persisted between reloads).
+  ============================================================== */
+  const chatHistory = [];
+  const chatToggle = document.getElementById('chatToggle');
+  const chatPanel = document.getElementById('chatPanel');
+  const chatBody = document.getElementById('chatBody');
+  const chatForm = document.getElementById('chatForm');
+  const chatInput = document.getElementById('chatInput');
+  const chatMicBtn = document.getElementById('chatMicBtn');
+  const chatVoiceBtn = document.getElementById('chatVoiceBtn');
+  let floVoiceEnabled = false;
+
+  // Read Flo's answers aloud with the browser's built-in text-to-speech voice.
+  function speakFlo(text){
+    if(!floVoiceEnabled || !('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const speech = new SpeechSynthesisUtterance(text);
+    speech.lang = navigator.language || 'en-US';
+    speech.rate = 1;
+    window.speechSynthesis.speak(speech);
+  }
+
+  chatVoiceBtn.addEventListener('click', function(){
+    if(!('speechSynthesis' in window)){
+      showToast('Voice playback is not supported in this browser.');
+      return;
+    }
+    floVoiceEnabled = !floVoiceEnabled;
+    chatVoiceBtn.classList.toggle('active', floVoiceEnabled);
+    chatVoiceBtn.setAttribute('aria-label', floVoiceEnabled ? "Turn off Flo's voice" : "Turn on Flo's voice");
+    chatVoiceBtn.title = floVoiceEnabled ? "Turn off Flo's voice" : "Turn on Flo's voice";
+    chatVoiceBtn.textContent = floVoiceEnabled ? '🔊 On' : '🔊';
+    if(floVoiceEnabled){
+      speakFlo("Flo's voice is on.");
+    }else{
+      window.speechSynthesis.cancel();
+    }
+  });
+
+  // Let the user ask Flo a cooking question by speaking instead of typing.
+  chatMicBtn.addEventListener('click', function(){
+    const ChatSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(!ChatSpeechRecognition){
+      showToast('Voice chat works in Chrome or Edge.');
+      return;
+    }
+
+    const recognition = new ChatSpeechRecognition();
+    recognition.lang = navigator.language || 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    chatMicBtn.disabled = true;
+    chatMicBtn.textContent = '…';
+
+    recognition.onresult = function(event){
+      chatInput.value = event.results[0][0].transcript.trim();
+      chatForm.requestSubmit();
+    };
+    recognition.onerror = function(event){
+      showToast(event.error === 'not-allowed'
+        ? 'Please allow microphone access to talk to Flo.'
+        : 'I couldn\'t hear that. Please try again.');
+    };
+    recognition.onend = function(){
+      chatMicBtn.disabled = false;
+      chatMicBtn.textContent = '🎙️';
+    };
+    recognition.start();
+  });
+
+  function addChatBubble(role, text){
+    const bubble = document.createElement('div');
+    bubble.className = 'chat-bubble ' + (role === 'user' ? 'chat-user' : 'chat-bot');
+    bubble.textContent = text;
+    chatBody.appendChild(bubble);
+    chatBody.scrollTop = chatBody.scrollHeight;
+    return bubble;
+  }
+
+  chatToggle.addEventListener('click', function(){
+    chatPanel.classList.toggle('open');
+    if(chatPanel.classList.contains('open') && !chatBody.dataset.greeted){
+      const greeting = "Hi, I'm Flo 👋 Ask me anything about cooking — substitutions, techniques, timing, whatever you need.";
+      addChatBubble('model', greeting);
+      speakFlo(greeting);
+      chatBody.dataset.greeted = '1';
+    }
+  });
+
+  chatForm.addEventListener('submit', async function(e){
+    e.preventDefault();
+    const text = chatInput.value.trim();
+    if(!text) return;
+    chatInput.value = '';
+    addChatBubble('user', text);
+    chatHistory.push({ role: 'user', text: text });
+    const thinking = addChatBubble('model', 'Thinking…');
+
+    try{
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, history: chatHistory.slice(0, -1) })
+      });
+      const data = await res.json().catch(function(){ return {}; });
+      thinking.textContent = data.reply || "Sorry, I couldn't reply just now.";
+      chatHistory.push({ role: 'model', text: thinking.textContent });
+      speakFlo(thinking.textContent);
+    }catch(err){
+      thinking.textContent = "Sorry, I couldn't reach the kitchen right now.";
+    }
+  });
+</script>
+
+</body>
+</html>
